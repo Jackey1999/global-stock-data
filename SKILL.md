@@ -1,20 +1,21 @@
 ---
 name: global-stock-data
-description: 美股港股全栈数据工具包（官方源优先）— 十三层架构·30+端点·11数据源·全部零鉴权。在原有行情/K线/技术指标(MA/MACD/RSI/KDJ/布林带)/基本面/资金面/期权/SEC Filing/工具八层之上，新增：CBOE官方期权链(完整希腊字母+IV+0DTE流+异动识别)、FINRA全市场每日空头成交量、SEC EDGAR申报事件流(Form4内部人/8-K/13F机构持仓)、EDGAR全市场横截面筛选、美债收益率曲线/CFTC COT/财报日历。每个数据源标注合规级别与条款原文。内嵌全部调用代码，自包含零依赖外部文件。适用于美股港股个股分析、全市场筛选、财报解读、期权与0DTE策略、做空数据追踪、SEC文件检索、资金流与机构持仓分析等场景。
+description: 美股港股全栈数据工具包（官方源优先）— 十四层架构·40+端点·14数据源·全部零鉴权。在原有行情/K线/技术指标(MA/MACD/RSI/KDJ/布林带)/基本面/资金面/期权/SEC Filing/工具八层之上，新增：CBOE官方期权链(完整希腊字母+IV+0DTE流+异动识别)、FINRA全市场每日空头成交量、SEC EDGAR申报事件流(Form4内部人/8-K/13F机构持仓)、EDGAR全市场横截面筛选、美债收益率曲线/CFTC COT/财报日历；V2.1 新增全球利率汇率层(BIS 38家央行政策利率、欧洲央行汇率/利率/欧元区收益率曲线、纽约联储SOFR/EFFR、美联储H.10汇率/H.6货币存量、美国财政部国债拍卖/联邦债务)，Yahoo K线修复全历史日线与时区并支持日本/台湾/韩国/印度/欧洲等市场代码。每个数据源标注合规级别与条款原文。内嵌全部调用代码，自包含零依赖外部文件。适用于美股港股个股分析、全市场筛选、财报解读、期权与0DTE策略、做空数据追踪、SEC文件检索、资金流与机构持仓分析、全球利率汇率与央行政策跟踪等场景。
 origin: custom
-version: 2.0.3
+version: 2.1.0
 ---
 
 > 📦 项目主页：https://github.com/simonlin1212/global-stock-data — 更新、反馈、支持作者
 > 
 > 作者：Simon 林 · X [@linsizhen](https://x.com/linsizhen) · 邮箱：simonlin0423@gmail.com
 
-# 美股港股全栈数据工具包 V2.0 — 官方源优先
+# 美股港股全栈数据工具包 V2.1 — 官方源优先
 
-十三层数据架构，30+ 个端点，11 个数据源，全部零鉴权，实测可用（2026-07-24 全量回归验证）。
+十四层数据架构，40+ 个端点，14 个数据源，全部零鉴权，实测可用（2026-07-24 全量回归验证；V2.1 新增与修复部分 2026-10-11 实测）。
 
 **V2.0 设计原则：官方源优先。** 新增层的主力数据取自美国政府（SEC EDGAR / Treasury / CFTC）、
-自律组织（FINRA）与交易所（CBOE / Nasdaq）的公开端点。**每个数据源都标注了合规级别与条款原文**
+自律组织（FINRA）与交易所（CBOE / Nasdaq）的公开端点；V2.1 再加国际清算银行、欧洲央行、
+美联储、纽约联储四家官方机构。**每个数据源都标注了合规级别与条款原文**
 （见下方「数据源合规分级」）——"官方"不等于"可自由使用"，各源差异极大。
 
 **本工具只分发代码，不分发、不转售任何市场数据**；数据由使用者自行按各源条款获取。
@@ -29,7 +30,7 @@ version: 2.0.3
 
 K线层（日/周/月/分钟）
 ├── 新浪          → 美股日K (回溯至1984年)
-└── Yahoo chart   → 美股+港股 (v8 API, 零crumb)
+└── Yahoo chart   → 美股+港股+日本/台湾/韩国/印度/欧洲等 (v8 API, 零crumb, 全历史日线)  [D级]
 
 技术指标层（纯计算，零额外依赖）
 └── MA/EMA + MACD + RSI + KDJ + 布林带    基于K线OHLCV，纯Python计算
@@ -73,7 +74,16 @@ SEC Filing层（仅美股）
 宏观 / 日历 ⭐
 ├── Treasury → 美债收益率曲线(1M~30Y, 每日)                             [S级]
 ├── CFTC     → COT 持仓报告                                             [S级]
-└── Nasdaq   → 财报日历(含盘前盘后+EPS预期)                             [C级·未核实]
+└── Nasdaq   → 财报日历(含盘前盘后+EPS预期)                             [D级]
+
+━━━ 以下为 V2.1 新增 ━━━
+
+全球利率 / 汇率 / 央行 ⭐
+├── BIS      → 38家央行政策利率(一次取全)                               [S级]
+├── ECB      → 欧元参考汇率 + ECB三大利率 + 欧元区收益率曲线            [S级]
+├── 纽约联储 → SOFR / EFFR / OBFR / TGCR / BGCR                         [S级·须附声明]
+├── 美联储   → H.10 美元对23种货币 + H.6 M1/M2                          [S级]
+└── 财政部   → 国债拍卖结果与日程 + 联邦债务 + 国债平均利率             [S级]
 ```
 
 ---
@@ -83,35 +93,45 @@ SEC Filing层（仅美股）
 | 我想要… | 去哪层 | 主力源 | 合规级 |
 |---|---|---|---|
 | 实时/延时报价 | Layer 1 | 新浪 / 腾讯 / 东财 | C |
-| K 线（日/周/月） | Layer 2 | 新浪 / Yahoo | C |
+| K 线（日/周/月；日本/台湾/韩国/印度/欧洲等换代码后缀） | Layer 2 | 新浪 / Yahoo | C·D |
 | 技术指标 MA/MACD/RSI/KDJ/布林 | Layer 3 | 本地计算 | — |
-| 财报三表 / 关键指标 / 分析师 / 机构持仓 | Layer 4 | 东财 / Yahoo / EDGAR | C·S |
+| 财报三表 / 关键指标 / 分析师 / 机构持仓 | Layer 4 | 东财 / Yahoo / EDGAR | C·D·S |
 | 日级资金流 | Layer 5 | 东财 | C |
 | **期权链 + 希腊字母 + IV + 0DTE + 异动flow** | **Layer 6.1** | **CBOE 官方** ⭐ | C |
-| 期权链（无希腊字母，后备） | Layer 6.2 | Yahoo | C |
+| 期权链（无希腊字母，后备） | Layer 6.2 | Yahoo | D |
 | 10-K/10-Q/8-K 列表、XBRL 财务 | Layer 7 | SEC EDGAR | **S** |
-| 搜索 / 新闻 / CIK 映射 / 全市场列表 | Layer 8 | 东财 / Yahoo / SEC | C·S |
+| 搜索 / 新闻 / CIK 映射 / 全市场列表 | Layer 8 | 东财 / Yahoo / SEC | C·D·S |
 | **全市场每日空头成交量、个股空头占比** | **Layer 9** | **FINRA Reg SHO** ⭐ | B |
 | **当日申报流：Form 4 内部人 / 8-K / 13F** | **Layer 10.1** | **EDGAR 每日索引** ⭐ | **S** |
 | **申报全文检索（2001 至今正文）** | **Layer 10.2** | **EDGAR FTS** ⭐ | **S** |
 | **全市场基本面横截面（免费 screener）** | **Layer 11** | **EDGAR frames** ⭐ | **S** |
-| 美债收益率曲线 / CFTC COT / 财报日历 | Layer 12 | Treasury / CFTC / Nasdaq | S·C |
+| 美债收益率曲线 / CFTC COT / 财报日历 | Layer 12 | Treasury / CFTC / Nasdaq | S·D |
+| **全球央行政策利率** | **Layer 13.1** | **BIS** ⭐ | **S** |
+| **欧元汇率 / ECB 利率 / 欧元区收益率曲线** | **Layer 13.2** | **欧洲央行** ⭐ | **S** |
+| **SOFR / EFFR 等美元参考利率** | **Layer 13.3** | **纽约联储** ⭐ | **S** |
+| **美元对 23 种货币汇率 / M1·M2** | **Layer 13.4** | **美联储** ⭐ | **S** |
+| **国债拍卖结果与日程 / 联邦债务** | **Layer 13.5** | **财政部 FiscalData** ⭐ | **S** |
 
-⭐ = V2.0 新增，且为 yfinance 与多数开源方案不具备的能力。
+⭐ = V2.0 / V2.1 新增，且为 yfinance 与多数开源方案不具备的能力。
 
 ---
 
 ## 数据源合规分级（取用前必读 — 各级均引条款原文）
 
-> 下表结论来自 **2026-07-24 逐家实读各源条款原文**，不是推断。引号内为原文。
+> 下表结论来自 **逐家实读各源条款原文**（2026-07-24；V2.1 于 2026-10-11 复核 Yahoo / Nasdaq，
+> 并新读 BIS / ECB / 美联储理事会 / 纽约联储 4 家新增官方源），不是推断。引号内为原文。
 > **各源差异极大，"官方"不等于"可自由使用"。**
 
-### S 级 — 可自由使用（含商用与再分发）
+### S 级 — 可自由使用（含商用与再分发；部分要求注明来源）
 
 | 源 | 依据（原文） |
 |---|---|
 | **SEC EDGAR** | 官网明示：*"Anyone can access and download this information **for free**"*、*"We **allow scripted access** to sec.gov content"*。**硬性要求**：`Current max request rate: 10 requests/second`，且必须声明 User-Agent（格式 `Company Name AdminContact@domain.com`），否则触发 *"Undeclared Automated Tool"* / Access Denied |
-| **US Treasury / CFTC** | 美国联邦政府作品不受版权保护（17 U.S.C. §105）。⚠️ 本次**未逐条核验**两站条款正文，按政府数据惯例归此级 |
+| **US Treasury / CFTC** | 美国联邦政府作品不受版权保护（17 U.S.C. §105）。FiscalData 接口文档：*"Our API is **open**, meaning that it does not require a user account or registration for a token."* ⚠️ 收益率曲线页与 CFTC 的条款正文**未逐条核验**，按政府数据惯例归此级 |
+| **美联储理事会** | *"Unless otherwise indicated, information on Board's website is in the **public domain** and may be copied and distributed without permission. Please **cite to the Board** as the source of the information."* |
+| **纽约联储** | *"The New York Fed grants you a non-exclusive license… to use, copy, and distribute Content for your **personal or business purposes**. You may: Access the Content, manually or **through an automated process** or device…"* ⚠️ 对外展示或分发参考利率（SOFR / EFFR 等）时**必须附上**这段声明（方括号为原文所有，按原文脚注由使用者填写）：*"The [NAME OF DATA or CONTENT] is subject to the Terms of Use posted at newyorkfed.org. The New York Fed is not responsible for publication of the [DATA NAME] by [NAME OF PUBLISHER], does not [sanction] or [endorse] any particular republication, and has no liability for your use."* |
+| **BIS 国际清算银行** | *"The use of the statistics is **unrestricted**, provided that: if the statistics are reproduced, the BIS must be **cited** in your publication or product as the source of the statistics…"* |
+| **欧洲央行 ECB** | *"All publicly available ESCB statistics may be **reused free of charge** on the condition that the source is quoted (e.g. "Source: ECB statistics.") and that the statistics (including metadata) are **not modified**."* |
 
 ### B 级 — 数据文件系主动公开，但站点条款含限制
 
@@ -124,8 +144,19 @@ SEC Filing层（仅美股）
 | 源 | 依据（原文） |
 |---|---|
 | **CBOE** | Use of Content 政策：使用任何 Cboe Content 须 *"receive **approval in advance** from Cboe"*，并须 *"**execution of a license agreement**"*；政策**不区分**商用/非商用、不区分实时/延时。→ **本工具的 CBOE 期权层仅供个人研究；商业用途或再分发前，须先向 Cboe 申请授权。** |
-| **Nasdaq** | 本次抓取条款页超时，**未核实**。按未核实处理 |
-| Yahoo / 东财 / 新浪 / 腾讯 | Yahoo 官方文档写明 **personal use only**；其余为站点前端接口。仅供个人研究，勿用于商业产品或再分发 |
+| 东财 / 新浪 / 腾讯 | 站点前端接口，未见针对接口的公开授权条款。仅供个人研究，勿用于商业产品或再分发 |
+
+### D 级 — 条款禁止未经许可的自动抓取（V2.1 复核后新增此级）
+
+| 源 | 依据（原文） | 本工具里用到它的地方 |
+|---|---|---|
+| **Yahoo Finance** | 条款禁止 *"access or collect data, or attempt to access or collect data, from our Services using **any automated means**, devices, programs, algorithms or methodologies, including but not limited to robots, spiders, scrapers… **for any purpose without our express, prior permission**."* | 美股 K 线备源、**港股 K 线（唯一来源）**、其他市场 K 线、英文关键指标、分析师、机构持仓、期权后备、新闻 |
+| **Nasdaq** | 条款（Last Updated: May 11, 2026）禁止 *"access or use the Service, or **any process, whether automated or manual**, to capture data or content from the Service… for any reason"*，并禁止未经书面许可把内容用于 *"any other form of data analysis software… including, but not limited to, scraping, data mining"*；授权范围 *"solely for your **personal, non-commercial use**"* | Layer 12 财报日历 `earnings_calendar()` |
+
+> **为什么 D 级保留代码，而 HKEX 直接排除？** 坦白说，两者条款性质相同。区别只在于有没有替代：
+> Yahoo 是本工具港股 K 线、美港以外市场 K 线的唯一来源，Nasdaq 是财报日历唯一免 key 的来源；
+> HKEX CCASS 则是可有可无的增量。所以 D 级代码保留、条款原文照贴——
+> **仅供个人学习研究，风险自负，不得商用或再分发；用不用由你按条款自行判断。**
 
 ### ⛔ 已排除的源
 
@@ -135,9 +166,9 @@ SEC Filing层（仅美股）
 
 ### 给使用者的三条硬规则
 
-1. **商业用途**：只依赖 **S 级**（SEC EDGAR / Treasury / CFTC）。B 级需自行确认，C 级须先取得授权。
-2. **再分发**：本工具**只分发代码，不分发任何市场数据**。你也不应把 B/C 级源取得的数据对外分发。
-3. **限速**：所有新增层的请求已内置节流（见「统一 HTTP 层」）。**不要绕过它**——SEC 的 10 req/s 是官方硬上限。
+1. **商业用途**：只依赖 **S 级**（SEC EDGAR / Treasury / CFTC / 美联储 / 纽约联储 / BIS / ECB），并按各源要求注明来源。B 级需自行确认，C 级须先取得授权，D 级不得商用。
+2. **再分发**：本工具**只分发代码，不分发任何市场数据**。你也不应把 B/C/D 级源取得的数据对外分发。
+3. **限速**：所有官方源请求已内置节流（见「官方源统一出口」）。**不要绕过它**——SEC 的 10 req/s 是官方硬上限。
 
 ---
 
@@ -160,7 +191,10 @@ SEC Filing层（仅美股）
 - 用户要看**关键财务指标概览**（营收/净利/EPS/ROE/ROA/资产负债率 中文版）
 - 用户要看**技术指标**（MACD/RSI/KDJ/布林带/均线）
 - 用户要判断**金叉死叉/超买超卖/变盘信号**
-- 关键词：美股、港股、AAPL、苹果、腾讯、00700、TSLA、特斯拉、BABA、阿里巴巴、行情、K线、财报、PE、PB、ROE、分析师、目标价、期权、call、put、SEC、10-K、年报、季报、资金流、主力、机构持仓、新闻、涨幅排名、全市场、筛选、关键指标、MACD、RSI、KDJ、布林带、均线、金叉、死叉、超买、超卖、技术分析
+- 用户要查**日本/台湾/韩国/印度/欧洲/澳洲/加拿大等市场**的 K 线（Yahoo 换代码后缀）
+- 用户要看**全球央行政策利率**、美联储/欧央行利率、SOFR/EFFR
+- 用户要看**汇率**（欧元或美元对各国货币）、欧元区国债收益率、美国国债拍卖、联邦债务、M1/M2
+- 关键词：美股、港股、AAPL、苹果、腾讯、00700、TSLA、特斯拉、BABA、阿里巴巴、行情、K线、财报、PE、PB、ROE、分析师、目标价、期权、call、put、SEC、10-K、年报、季报、资金流、主力、机构持仓、新闻、涨幅排名、全市场、筛选、关键指标、MACD、RSI、KDJ、布林带、均线、金叉、死叉、超买、超卖、技术分析、日股、台股、韩股、印度股、欧股、央行、政策利率、加息、降息、SOFR、EFFR、汇率、欧元、日元、收益率曲线、国债拍卖、美债、联邦债务、M2
 
 ---
 
@@ -168,6 +202,8 @@ SEC Filing层（仅美股）
 
 ```bash
 pip install requests
+# Windows 另装 tzdata，Yahoo K 线才能按交易所时区算日期（Linux / macOS 自带）
+pip install tzdata
 ```
 
 | 依赖 | 版本要求 | 用途 |
@@ -197,6 +233,18 @@ pip install requests
 |------|------|------|
 | 美股 | 直接 ticker | `AAPL`, `TSLA`, `BABA` |
 | 港股 | 四/五位数字 + `.HK` | `0700.HK`, `9988.HK` |
+| 日本 | 四位代码 + `.T` | `7203.T`（丰田） |
+| 台湾 上市 / 上柜 | 代码 + `.TW` / `.TWO` | `2330.TW`（台积电）, `6488.TWO` |
+| 韩国 KOSPI / KOSDAQ | 六位代码 + `.KS` / `.KQ` | `005930.KS`（三星）, `247540.KQ` |
+| 印度 NSE | 代码 + `.NS` | `RELIANCE.NS` |
+| 英国 / 德国 / 法国 / 荷兰 / 瑞士 | `.L` / `.DE` / `.PA` / `.AS` / `.SW` | `SHEL.L`, `SAP.DE`, `MC.PA`, `ASML.AS`, `NESN.SW` |
+| 新加坡 / 澳洲 / 加拿大 / 巴西 | `.SI` / `.AX` / `.TO` / `.SA` | `D05.SI`, `BHP.AX`, `RY.TO`, `PETR4.SA` |
+| 主要指数 | `^` 开头 | `^GSPC` 标普 · `^N225` 日经 · `^HSI` 恒指 · `^KS11` · `^TWII` · `^NSEI` · `^FTSE` · `^GDAXI` · `^FCHI` · `^STOXX50E` · `^AXJO` · `^GSPTSE` · `^STI` · `^BVSP` |
+| 汇率 / 期货 | `=X` / `=F` | `JPY=X`（美元兑日元）, `GC=F`（黄金）, `CL=F`（原油） |
+
+> 表中 37 个示例代码 2026-10-11 全部实测能取到 K 线。注意：① 价格是**当地货币**，伦敦是**便士**（`SHEL.L` 3793.5 = 37.935 英镑）；
+> ② 印度孟买所 `.BO` 实测只返回 1 根 bar，**用 `.NS`**；③ 台股 Yahoo 成交量比台湾证交所自己的数据约少 10%，开高低收一致；
+> ④ A 股 `.SS` / `.SZ` 也能取，但 A 股请用姊妹项目 a-stock-data。⑤ Yahoo 条款禁止未经许可的自动抓取，见「数据源合规分级」。
 
 ### 东财 datacenter SECUCODE 格式
 
@@ -278,14 +326,14 @@ def eastmoney_datacenter(report_name: str, columns: str = "ALL",
 
 ### 官方源统一出口（限流 + UA 声明）— V2.0 新增
 
-V2.0 新增的 Layer 9–12 全部走这个出口。它负责三件事：**按源限速**、**SEC User-Agent 声明**、
+V2.0 起新增的 Layer 9–13 全部走这个出口。它负责三件事：**按源限速**、**SEC User-Agent 声明**、
 **友好错误提示**。
 
 > ⚠️ **使用前必改**：把 `SEC_CONTACT` 换成你自己的真实姓名与邮箱。
 > SEC 官方要求声明 User-Agent，未声明会被判定为 *Undeclared Automated Tool* 并拒绝服务。
 
 ```python
-import requests, time, threading
+import requests, re, time, threading
 
 # ⚠️⚠️ 必改：SEC 要求 UA 含真实联系方式，格式 "Company Name AdminContact@domain.com"
 SEC_CONTACT = "your-name your-email@example.com"
@@ -391,7 +439,9 @@ def official_get(url: str, params: dict = None, headers: dict = None,
                 f"当前 SEC_CONTACT={SEC_CONTACT!r}，"
                 f"格式应为 'Company Name AdminContact@domain.com'") from e
         # ③ 其余一律视为真错误，必须冒泡（限流/封禁/权限/接口变更）
-        hint = {403: "被拒绝：限流、封禁或权限问题（已排除「资源不存在」）",
+        body = re.sub(r"\s+", " ", re.sub(r"(?s)<(script|style).*?</\1>|<[^>]+>", " ", resp.text or "")).strip()
+        hint = {400: "参数错误：" + (body[:200] or "（官方未给原因）"),
+                403: "被拒绝：限流、封禁或权限问题（已排除「资源不存在」）",
                 404: "端点不存在：接口可能已变更",
                 429: "请求过快：已内置节流，若仍触发请调低 _LIMITS"}.get(code, "")
         raise RuntimeError(f"HTTP {code} {url[:80]} — {hint}") from e
@@ -686,7 +736,9 @@ def stock_quote_eastmoney(ticker_or_code: str, secid_prefix: int = 105) -> dict:
 
 ### 2.1 美股 K 线 — 新浪（主）+ Yahoo（备）
 
-两个独立数据源。新浪最长可回溯到 1984 年；Yahoo 适合需要复权数据的场景。
+两个独立数据源。新浪最长可回溯到 1984 年；Yahoo 带复权收盘 `adj_close`（含分红），支持周/月/分钟线和按起止日期取。
+
+> ⚠️ **V2.1 修复**：旧版 `range_="max"` 拿到的是季线/月线却标成日线，日期还随使用者电脑时区漂移（在纽约看港股会早一天），周/月线末尾还多出一根只含最新一天的 bar。现已全部修正；周/月/季线改由日线按交易所当地日历合并，详见 CHANGELOG。
 
 > **注意：** 东财 push2his kline/get 端点实测不返回美股/港股数据（2026-05-20 验证），仅支持 A 股。美股/港股 K 线用新浪和 Yahoo。
 
@@ -722,38 +774,200 @@ def us_stock_kline_sina(ticker: str, num: int = 120) -> list[dict]:
     return result
 
 
-def stock_kline_yahoo(symbol: str, interval: str = "1d",
-                       range_: str = "6mo") -> list[dict]:
+_YAHOO_INTRADAY = {"1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "4h"}
+
+
+def _yahoo_exchange_tz(meta: dict, intraday: bool):
+    """K 线日期按交易所当地时间算，与使用者电脑的时区无关。"""
+    from datetime import timedelta, timezone
+    try:
+        from zoneinfo import ZoneInfo          # Python 3.9+；Windows 需另装 tzdata
+        return ZoneInfo(meta["exchangeTimezoneName"]), 0
+    except Exception:
+        # 退回固定偏移：gmtoffset 是「当前」偏移，跨夏令时会差 1 小时。
+        # 日/周/月线的时间戳落在当地 00:00–16:00 之间，再加 3 小时可吸收这 1 小时误差。
+        tz = timezone(timedelta(seconds=meta.get("gmtoffset") or 0))
+        return tz, (0 if intraday else 3 * 3600)
+
+
+def _yahoo_range_start(range_: str):
+    """range_ → 起始日（UTC 日期），供周/月/季线换算成起止日期用"""
+    import calendar
+    from datetime import datetime, timedelta, timezone
+    today = datetime.now(timezone.utc).date()
+    if range_ == "ytd":
+        return today.replace(month=1, day=1)
+    m = re.fullmatch(r"(\d+)(d|mo|y)", str(range_))
+    if not m:
+        raise ValueError(f"range_ 取 1d/5d/1mo/3mo/6mo/1y/2y/5y/10y/ytd/max，收到 {range_!r}")
+    n, unit = int(m.group(1)), m.group(2)
+    if unit == "d":
+        return today - timedelta(days=n)
+    k = today.year * 12 + today.month - 1 - n * (12 if unit == "y" else 1)
+    y, m = k // 12, k % 12 + 1
+    return today.replace(year=y, month=m, day=min(today.day, calendar.monthrange(y, m)[1]))
+
+
+def stock_kline_yahoo(symbol: str, interval: str = "1d", range_: str = "6mo",
+                      start: str = None, end: str = None) -> list[dict]:
     """
-    Yahoo Finance chart API — 美股+港股通用，零crumb
-    symbol: "AAPL" (美股) 或 "0700.HK" (港股)
-    interval: "1d", "1wk", "1mo", "5m", "15m", "1h"
-    range_: "1d", "5d", "1mo", "3mo", "6mo", "1y", "5y", "max"
-    返回: [{date, open, high, low, close, volume}, ...]
+    Yahoo Finance chart API — 美股/港股及其他市场通用，零crumb
+    symbol: "AAPL" (美股) / "0700.HK" (港股) / 其他市场后缀见「市场代码规则」
+    interval: "1d", "1wk", "1mo", "3mo", "1m", "2m", "5m", "15m", "30m", "90m", "1h", "4h"
+    range_: "1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"
+    start / end: "YYYY-MM-DD"（按交易所当地日期），给了任一个就按起止日期取（忽略 range_）；
+                 只给 end = 从最早一根取到 end。日线、分钟线含 start、end 当天
+    返回: [{date, open, high, low, close, volume, adj_close?}, ...]；区间内没有交易返回 []
+
+    周/月/季线由日线按交易所当地日历合并（日期标签是周期第一天：周一 / 每月 1 日 / 每季第一天，
+    与 Yahoo 原生标签一致）。每一根都是完整周期：start 所在周期从第一天算起，end 所在周期算到最后一天，
+    还没走完的当期只到最新交易日。range_ 同理：会补齐第一个周期（如 2y 月线 = 25 根）。
+    不直接用 Yahoo 原生周/月/季线，是因为它在节假日开头的那一周会拿上一周的收盘价当开盘价（实测东京、
+    香港、伦敦），按 start/end 截取时周线会多算或少算一天、季线分组跟着起始日漂移，末尾还会多一根只含最新一天的 bar。
+
+    ⚠️ Yahoo 的 range=max 会无视 interval，按标的年限退成月线或季线
+    （实测 AAPL 返回 169 根季线、0700.HK 270 根月线），所以 "max" 在这里改用起止时间请求，
+    日线可拿到上市以来全部（AAPL 1980 起 11,549 根）。分钟线 Yahoo 只给最近 60 天（1h / 4h 为 730 天；
+    1m 为 30 天且一次最多取约 7 天；2m 实测只有最近约 30 个交易日，更早的返回 []），不支持 "max"；
+    在这个窗口内可以用 start/end。start 落在窗口第一天时，只返回窗口内的那一段。
     """
+    import time
+    from datetime import datetime, timedelta, timezone
+    intraday = interval in _YAHOO_INTRADAY
+
+    def _day(s, name):
+        try:
+            return datetime.strptime(s, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        except (TypeError, ValueError):
+            raise ValueError(f"{name} 要写成 YYYY-MM-DD，收到 {s!r}") from None
+
+    d0 = _day(start, "start") if start else None
+    d1 = _day(end, "end") if end else None
+    if d0 and d1 and d0 > d1:
+        raise ValueError(f"start {start} 晚于 end {end}")
+    # 当地日期最多比 UTC 日期早一天（新西兰开盘时 UTC 还是前一天），超过一天才算未来
+    if d0 and d0.timestamp() - 86400 > time.time():
+        raise ValueError(f"start {start} 在未来")
+
+    if interval in ("1wk", "1mo", "3mo"):
+        def _first(d):          # d 所在周期的第一天
+            if interval == "1wk":
+                return d - timedelta(days=d.weekday())
+            return d.replace(month=(d.month - 1) // (3 if interval == "3mo" else 1)
+                             * (3 if interval == "3mo" else 1) + 1, day=1)
+
+        def _next(d):           # 下一个周期的第一天
+            if interval == "1wk":
+                return d + timedelta(days=7)
+            k = d.year * 12 + d.month - 1 + (3 if interval == "3mo" else 1)
+            return d.replace(year=k // 12, month=k % 12 + 1, day=1)
+
+        if not (d0 or d1) and range_ != "max":
+            d0 = datetime.combine(_yahoo_range_start(range_), datetime.min.time(), timezone.utc)
+        s0 = _first(d0.date()).isoformat() if d0 else None
+        s1 = (_next(_first(d1.date())) - timedelta(days=1)).isoformat() if d1 else None
+        daily = stock_kline_yahoo(symbol, "1d", range_="max", start=s0, end=s1)
+        bars = {}
+        for x in daily:
+            k = _first(datetime.strptime(x["date"], "%Y-%m-%d").date()).isoformat()
+            b = bars.get(k)
+            if b is None:
+                bars[k] = dict(x, date=k)
+                continue
+            b["high"] = max(v for v in (b["high"], x["high"]) if v is not None) \
+                if (b["high"] is not None or x["high"] is not None) else None
+            b["low"] = min(v for v in (b["low"], x["low"]) if v is not None) \
+                if (b["low"] is not None or x["low"] is not None) else None
+            b["close"] = x["close"]
+            b["volume"] += x["volume"]
+            if "adj_close" in x:
+                b["adj_close"] = x["adj_close"]
+        return list(bars.values())
+
+    lo = d0.strftime("%Y-%m-%d") if d0 else None
+    hi = d1.strftime("%Y-%m-%d") if d1 else None
+    params = {"interval": interval, "events": "div,split"}
+    if d0 or d1:
+        # 起点往前放宽：亚太的时间戳落在 UTC 前一天（东京 00:00Z、悉尼 23:00Z、新西兰最早 21:00Z），
+        # 分钟线只放宽 14 小时，免得把 60 天窗口的第一天挤出去。终点：日线放宽 2 天；分钟线放宽 30 小时——
+        # 期货（CL=F 等）按纽约时间交易到当地午夜，即 UTC 次日 04:00–05:00；不放宽 2 天是给 1m 的 8 天上限留余量。
+        # 精确范围由下面按交易所当地日期再筛
+        pad = timedelta(hours=14) if intraday else timedelta(days=1)
+        params["period1"] = int((d0 - pad).timestamp()) if d0 else -2208988800  # 1900-01-01
+        if intraday:            # 放宽的部分不能超出 Yahoo 的分钟线窗口，否则整个请求被拒
+            days = {"1m": 30, "60m": 730, "1h": 730, "4h": 730}.get(interval, 60)
+            edge = int(time.time()) - days * 86400 + 600
+            for d, name, v in ((d0, "start", start), (d1, "end", end)):
+                if d and d.timestamp() + 86400 <= edge:
+                    raise ValueError(f"{interval} 线 Yahoo 只给最近 {days} 天，{name} {v} 超出范围")
+            params["period1"] = max(params["period1"], edge)
+        tail = timedelta(hours=30) if intraday else timedelta(days=2)
+        params["period2"] = min(int((d1 + tail).timestamp()) if d1 else 2**31, int(time.time()))
+        if params["period1"] >= params["period2"]:
+            return []           # start 是今天或明天（按 UTC），还没有成交
+        if interval == "1m" and params["period2"] - params["period1"] > 8 * 86400:
+            raise ValueError("1m 线 Yahoo 一次最多取约 7 天，请同时给 start 和 end，跨度不超过 7 天")
+    elif range_ == "max":
+        if intraday:
+            raise ValueError("分钟/小时线没有全部历史（Yahoo 分钟线只给最近 60 天，1m 30 天，1h / 4h 730 天），请用 range_ 或 start/end")
+        params["period1"], params["period2"] = -2208988800, int(time.time())
+    else:
+        params["range"] = range_
+
     url = f"https://query2.finance.yahoo.com/v8/finance/chart/{symbol}"
-    params = {"interval": interval, "range": range_}
-    r = requests.get(url, params=params, headers={
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
-    }, timeout=15)
+    r = requests.get(url, params=params, timeout=20, headers={
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"})
+    if r.status_code == 404:
+        raise ValueError(f"Yahoo 找不到 {symbol!r}（代码不对或已退市）")
+    if r.status_code in (400, 422):        # 参数不被接受（如分钟线超出 60 天窗口）
+        try:
+            desc = ((r.json().get("chart") or {}).get("error") or {}).get("description")
+        except ValueError:
+            desc = None
+        if desc and desc.startswith("Data doesn't exist"):
+            return []           # 区间早于上市或晚于最新交易日，和节假日一样视为「没有交易」
+        raise ValueError(f"Yahoo 拒绝该请求：{desc or r.text[:200]}")
     r.raise_for_status()
-    
-    d = r.json()
-    chart = d.get("chart", {}).get("result", [{}])[0]
-    timestamps = chart.get("timestamp", [])
-    quote = chart.get("indicators", {}).get("quote", [{}])[0]
-    
-    from datetime import datetime
+
+    chart = ((r.json().get("chart") or {}).get("result") or [None])[0] or {}
+    meta = chart.get("meta") or {}
+    timestamps = chart.get("timestamp") or []
+    indicators = chart.get("indicators") or {}
+    quote = (indicators.get("quote") or [{}])[0]
+    adj = ((indicators.get("adjclose") or [{}])[0]).get("adjclose")
+    tz, nudge = _yahoo_exchange_tz(meta, intraday)
+    live_ts = meta.get("regularMarketTime")
+    fmt = "%Y-%m-%d %H:%M" if intraday else "%Y-%m-%d"
+
+    def _local(ts):
+        # 最新一根的时间戳是真实成交时间，用当前偏移换算本来就准，不加修正量
+        return datetime.fromtimestamp(ts + (0 if ts == live_ts else nudge), tz)
+
+    def _v(key, i):
+        x = (quote.get(key) or [None] * len(timestamps))[i]
+        # Yahoo 内部按单精度存价格（7786.36 会变成 7786.3599…），保留 7 位有效数字去掉噪声；
+        # 不能一律只留 2 位小数——港股仙股、汇率有 3 位以上小数
+        return float(f"{x:.7g}") if x is not None else None
+
     result = []
     for i, ts in enumerate(timestamps):
-        result.append({
-            "date": datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M") if "m" in interval or "h" in interval else datetime.fromtimestamp(ts).strftime("%Y-%m-%d"),
-            "open": round(quote["open"][i], 2) if quote["open"][i] else 0,
-            "high": round(quote["high"][i], 2) if quote["high"][i] else 0,
-            "low": round(quote["low"][i], 2) if quote["low"][i] else 0,
-            "close": round(quote["close"][i], 2) if quote["close"][i] else 0,
-            "volume": int(quote["volume"][i]) if quote["volume"][i] else 0,
-        })
+        close = _v("close", i)
+        if close is None:          # 停牌/缺失的 bar 直接跳过，不用 0 冒充价格
+            continue
+        row = {
+            "date": _local(ts).strftime(fmt),
+            "open": _v("open", i), "high": _v("high", i), "low": _v("low", i),
+            "close": close,
+            "volume": int((quote.get("volume") or [0] * len(timestamps))[i] or 0),
+        }
+        if adj and adj[i] is not None:
+            row["adj_close"] = float(f"{adj[i]:.7g}")    # 含分红再投资的复权收盘
+        if (hi and row["date"][:10] > hi) or (lo and row["date"][:10] < lo):
+            continue
+        if result and result[-1]["date"] == row["date"]:
+            result[-1] = row       # 盘中最后一根偶尔与上一根同日，保留较新的
+        else:
+            result.append(row)
     return result
 ```
 
@@ -762,8 +976,19 @@ def stock_kline_yahoo(symbol: str, interval: str = "1d",
 港股 K 线只有 Yahoo 一个可用源（新浪港股K线已失效，东财 push2his 不返回港股K线数据）。
 
 ```python
-# 港股 Yahoo K线: 直接调 stock_kline_yahoo("0700.HK")
+# 港股 Yahoo K线: 直接调 stock_kline_yahoo("0700.HK")；全部历史 stock_kline_yahoo("0700.HK", range_="max")
 ```
+
+### 2.3 其他市场 K 线 — Yahoo（同一函数，换代码后缀）
+
+`stock_kline_yahoo()` 不限美港：日本、台湾、韩国、印度、欧洲、新加坡、澳洲、加拿大、巴西的个股和主要指数
+都能取，代码规则见「市场代码规则 → Yahoo Finance 代码格式」。`key_statistics()` 等 Yahoo quoteSummary 函数同样认这些代码。
+
+> ⚠️ **合规**：Yahoo 条款禁止未经许可的自动抓取（原文见「数据源合规分级」）。本节只是说明现有函数能认哪些代码，
+> 仅供个人学习研究，风险自负，不得商用或再分发。
+
+**实测（2026-10-11，`range_="max"` 日线）**：丰田 7203.T 1999 起 6,851 根 · 台积电 2330.TW 2000 起 · 三星 005930.KS 2000 起 ·
+Reliance RELIANCE.NS 1996 起 · SAP.DE 1998 起 · BHP.AX 1988 起 · 日经 ^N225 1965 起 15,183 根 · 标普 ^GSPC 1927 起 24,811 根。
 
 ---
 
@@ -2150,7 +2375,8 @@ def cftc_cot(limit: int = 20, market_contains: str = None) -> list[dict]:
 
 
 def earnings_calendar(date: str = None) -> dict:
-    """Nasdaq 财报日历。date=YYYY-MM-DD，不传取今天"""
+    """Nasdaq 财报日历。date=YYYY-MM-DD，不传取今天。
+    ⚠️ D 级：Nasdaq 条款禁止自动抓取，仅供个人学习研究，见「数据源合规分级」"""
     date = date or datetime.now().strftime("%Y-%m-%d")
     j = official_get("https://api.nasdaq.com/api/calendar/earnings",
                      params={"date": date}, headers={"Accept": "application/json"},
@@ -2168,6 +2394,423 @@ def earnings_calendar(date: str = None) -> dict:
 
 ---
 
+## Layer 13: 全球利率 / 汇率 / 央行（S 级 ⭐ V2.1 新增）
+
+五家官方机构的公开接口，全部免注册、免密钥。政策利率覆盖 38 家仍在更新的央行（含欧元区），汇率有欧元对约 30 种货币、美元对 23 种货币两套。
+
+| 入口 | 来源 | 能拿到什么 | 频率 |
+|---|---|---|---|
+| `policy_rates()` | BIS 国际清算银行 | 48 个经济体政策利率（38 个仍在更新），一次取全 | 日 |
+| `ecb_fx()` | 欧洲央行 | 欧元参考汇率（1 欧元 = 多少外币） | 工作日 |
+| `ecb_key_rates()` | 欧洲央行 | 存款便利 / 主要再融资 / 边际贷款利率（每行是一次调息） | 调息时 |
+| `ecb_yield_curve()` | 欧洲央行 | 欧元区国债收益率曲线（AAA 级或全部国家） | 工作日 |
+| `ecb_series()` | 欧洲央行 | 通用入口：任意 ECB 数据集 + 序列代码 | — |
+| `nyfed_rates()` | 纽约联储 | SOFR / EFFR / OBFR / TGCR / BGCR / SOFR 平均与指数 | 工作日 |
+| `fed_data()` | 美联储 | H.10 美元对 23 种货币汇率、H.6 货币存量 M1/M2 | 日 / 月 |
+| `fiscal_data()` | 美国财政部 FiscalData | 国债拍卖结果与日程、联邦债务、国债平均利率、财政部记账汇率 | 日 / 月 / 季 |
+
+> **合规（各源条款原文见顶部「数据源合规分级」）**：BIS、ECB、美联储理事会要求注明来源；
+> ECB 还要求「不得改动数据」；纽约联储的参考利率对外展示或分发时，**必须附上它规定的声明**（原文见合规分级）。
+
+```python
+import csv, io, re
+from datetime import date as _date, timedelta
+
+
+def _num(x):
+    """SDMX / 美联储 CSV 的空值有 ''、'NaN'、'ND'（No Data）几种写法，统一成 None"""
+    if x is None:
+        return None
+    x = str(x).strip()
+    if x in ("", "NaN", "ND", "NA", "null"):
+        return None
+    try:
+        return float(x)
+    except ValueError:
+        return None
+
+
+_PERIOD_D = re.compile(r"\d{4}(-\d{2}(-\d{2})?)?")          # 2026 / 2026-09 / 2026-09-30
+_PERIOD = re.compile(r"\d{4}(-\d{2}(-\d{2})?|-Q[1-4])?")      # 另认季度写法 2026-Q3（季度数据集用）
+_YMD_ONLY = re.compile(r"\d{4}-\d{2}-\d{2}")
+_FMT = {_PERIOD_D: "YYYY / YYYY-MM / YYYY-MM-DD", _YMD_ONLY: "YYYY-MM-DD",
+        _PERIOD: "YYYY / YYYY-MM / YYYY-MM-DD（季度数据也认 YYYY-Q1）"}
+
+
+def _check_range(start, end, pattern=_PERIOD):
+    """
+    校验 start / end，返回规整后的 (start, end)。可传字符串或 datetime.date。
+    粒度可以不同（start="2024-12-20", end="2024" 合法），先后只比两者共同的前缀；
+    季度先换成月份再比（start 的 Q3 按 7 月、end 的 Q3 按 9 月）。
+    """
+    out = []
+    for name, v in (("start", start), ("end", end)):
+        if isinstance(v, _date):                 # datetime 也是 date 的子类
+            v = v.isoformat()[:10]
+        if v is not None:
+            if not (isinstance(v, str) and pattern.fullmatch(v)):
+                raise ValueError(f"{name} 要写成 {_FMT.get(pattern, 'YYYY-MM-DD')}，收到 {v!r}")
+            try:
+                if len(v) == 10:
+                    _date.fromisoformat(v)
+                elif len(v) == 7 and "Q" not in v and not 1 <= int(v[5:]) <= 12:
+                    raise ValueError
+            except ValueError:
+                raise ValueError(f"{name} 不是真实存在的日期：{v!r}") from None
+        out.append(v)
+    s, e = out
+    if s and e:
+        def _key(v, last):
+            if "Q" not in v:
+                return v
+            q = int(v[-1])
+            return f"{v[:4]}-{3 * q if last else 3 * q - 2:02d}"
+        ks, ke = _key(s, False), _key(e, True)
+        k = min(len(ks), len(ke))
+        if ks[:k] > ke[:k]:
+            raise ValueError(f"start {s} 晚于 end {e}")
+    return s, e
+
+
+def _period_params(last, start, end):
+    """SDMX 接口：给了 start/end 就按区间取，否则取每个序列最近 last 个观测"""
+    start, end = _check_range(start, end)
+    if start or end:
+        p = {}
+        if start:
+            p["startPeriod"] = start
+        if end:
+            p["endPeriod"] = end
+        return p
+    if int(last) < 1:
+        raise ValueError("last 必须 ≥ 1")
+    return {"lastNObservations": int(last)}
+
+
+def _sdmx_csv(url: str, params: dict) -> list[dict]:
+    rows = list(csv.DictReader(io.StringIO(official_get(url, params=params))))
+    if not rows:     # 代码不存在时 BIS / ECB 都回 404（已转成 DataNotAvailable）；这里兜底 200 + 只有表头
+        raise DataNotAvailable(f"{url[:90]} — 该代码或区间没有数据")
+    return rows
+
+
+_SDMX_PART = re.compile(r"^[A-Za-z0-9_.+\-]*$")
+
+
+# ── 13.1 全球央行政策利率 — BIS ──
+
+def policy_rates(areas=None, last: int = 1, start: str = None, end: str = None) -> list[dict]:
+    """
+    全球央行政策利率（BIS 国际清算银行，S 级，转载须注明来源 BIS）。
+
+    areas: ISO 两位代码，如 "US" 或 ["US", "JP", "CN", "XM"]（XM = 欧元区）；
+           None = 全部（2026-10 实测返回 48 个经济体，其中 38 个仍在更新；德法意等欧元区
+           成员国的本国利率停在 1998 年、阿根廷停在 2025-07，欧元区统一看 XM；
+           克罗地亚 2023 年改用欧元后 BIS 只剩空值，不返回）
+    last : 每个经济体取最近 N 个观测（日频，含周末）；与 start/end（YYYY-MM-DD）二选一
+    返回 [{area, name, date, rate, source}]，按经济体、日期升序
+
+    ⚠️ 各国更新有滞后：实测 2026-10-11 澳洲仍是 09-24 的 4.35，而澳洲央行 09-30 起已是 4.60。
+       一定要看 date，需要当天准确值请查该国央行。
+    """
+    if isinstance(areas, str):
+        areas = [areas]
+    for a in areas or []:
+        if not (isinstance(a, str) and len(a) == 2 and a.isascii() and a.isalpha()):
+            raise ValueError(f"经济体代码应为两位字母，如 'US' / 'XM'，收到 {a!r}")
+    key = "D." + "+".join(a.upper() for a in (areas or []))
+    params = _period_params(last, start, end)
+    if "lastNObservations" in params:      # 部分国家周末/假日记为空值（菲律宾），多取几天再截
+        params["lastNObservations"] += 10
+    rows = _sdmx_csv(f"https://stats.bis.org/api/v1/data/WS_CBPOL/{key}/all",
+                     dict(params, format="csv"))
+    by_area = {}
+    for r in rows:
+        rate = _num(r.get("OBS_VALUE"))
+        if rate is None:
+            continue
+        parts = (r.get("TITLE") or "").split(" - ")   # "Central bank policy rates - Japan - Daily - …"
+        by_area.setdefault(r["REF_AREA"], []).append({
+            "area": r["REF_AREA"], "name": parts[1].strip() if len(parts) > 2 else r["REF_AREA"],
+            "date": r["TIME_PERIOD"], "rate": rate, "source": (r.get("SOURCE_REF") or "").strip()})
+    out = []
+    for a in sorted(by_area):
+        obs = sorted(by_area[a], key=lambda x: x["date"])
+        out.extend(obs if (start or end) else obs[-int(last):])
+    if not out:
+        raise DataNotAvailable(f"BIS 政策利率：{areas or '全部'} 在该区间没有数值")
+    return out
+
+
+# ── 13.2 欧洲央行 — 汇率 / 关键利率 / 收益率曲线 ──
+
+def ecb_series(flow: str, key: str, last: int = 1, start: str = None,
+               end: str = None) -> list[dict]:
+    """
+    ECB 通用取数（S 级：须注明 "Source: ECB statistics." 且不得改动数据）。
+    flow / key 在 data.ecb.europa.eu 上查，如 flow="EXR", key="D.USD.EUR.SP00.A"。
+    返回 [{key, date, value, title}]，按序列、日期升序
+    """
+    if not (flow.isalnum() and _SDMX_PART.match(key)):
+        raise ValueError(f"非法的 ECB 数据集或序列代码：{flow!r} / {key!r}")
+    rows = _sdmx_csv(f"https://data-api.ecb.europa.eu/service/data/{flow}/{key}",
+                     dict(_period_params(last, start, end), format="csvdata"))
+    return [{"key": r["KEY"], "date": r["TIME_PERIOD"], "value": _num(r.get("OBS_VALUE")),
+             "title": r.get("TITLE")} for r in rows]
+
+
+# 默认币种。不传币种时 ECB 会连带返回已停发的货币（如 2022 年停的 RUB、HRK），所以给个默认清单
+_ECB_FX_DEFAULT = ["USD", "JPY", "GBP", "CHF", "CNY", "HKD", "AUD", "CAD", "SGD", "KRW",
+                   "INR", "SEK", "NOK", "DKK", "NZD", "BRL", "MXN", "ZAR", "TRY", "PLN"]
+
+
+def ecb_fx(currencies=None, last: int = 1, start: str = None, end: str = None) -> list[dict]:
+    """
+    欧元参考汇率：1 欧元 = rate 单位外币（每个工作日 16:00 CET 前后公布）。
+    currencies: "USD" 或 ["USD", "JPY"]；None = 20 种常用货币
+    返回 [{currency, date, rate}]
+    """
+    if isinstance(currencies, str):
+        currencies = [currencies]
+    cur = [c.upper() for c in (currencies or _ECB_FX_DEFAULT)]
+    if not all(len(c) == 3 and c.isascii() and c.isalpha() for c in cur):
+        raise ValueError(f"币种应为三位字母代码，收到 {currencies!r}")
+    rows = ecb_series("EXR", f"D.{'+'.join(cur)}.EUR.SP00.A", last, start, end)
+    return [{"currency": r["key"].split(".")[2], "date": r["date"], "rate": r["value"]}
+            for r in rows if r["value"] is not None]
+
+
+def _pivot_by_date(rows: list[dict], name_of) -> list[dict]:
+    table = {}
+    for r in rows:
+        if r["value"] is not None:
+            table.setdefault(r["date"], {"date": r["date"]})[name_of(r["key"])] = r["value"]
+    return [table[d] for d in sorted(table)]
+
+
+def ecb_key_rates(last: int = 1, start: str = None, end: str = None) -> list[dict]:
+    """
+    ECB 三大政策利率（%）：deposit_facility 存款便利（现行主导利率）、
+    main_refinancing 主要再融资、marginal_lending 边际贷款。
+
+    ⚠️ 这组数据只在调息那天有记录，不是每天一条：每行 = 从 date 起生效的三个利率。
+    last=N 是最近 N 次调整（只给 end 时是 end 之前的最近 N 次）；给 start 时，第一行是
+    start 当天仍在生效的那次调整（所以它的 date 可能早于 start），之后是区间内的每次调整。
+    返回日期升序
+    """
+    names = {"DFR": "deposit_facility", "MRR_FR": "main_refinancing", "MLFR": "marginal_lending"}
+    url = "https://data-api.ecb.europa.eu/service/data/FM/B.U2.EUR.4F.KR.DFR+MRR_FR+MLFR.LEV"
+    start, end = _check_range(start, end, _PERIOD_D)
+    if int(last) < 1:
+        raise ValueError("last 必须 ≥ 1")
+
+    def _get(params):
+        try:
+            return _sdmx_csv(url, dict(params, format="csvdata"))
+        except DataNotAvailable:
+            return []
+
+    if start:
+        first = start + ("-01-01" if len(start) == 4 else "-01" if len(start) == 7 else "")
+        before = (_date.fromisoformat(first) - timedelta(days=1)).isoformat()
+        rows = _get({"endPeriod": before, "lastNObservations": 1})   # start 前各自最后一次
+        rows += _get(dict({"startPeriod": start}, **({"endPeriod": end} if end else {})))
+    else:
+        # 多取几条：三个利率不一定同一天调，合并后最早几行可能缺项，裁掉
+        rows = _get(dict({"lastNObservations": int(last) + 3}, **({"endPeriod": end} if end else {})))
+    # 三个利率不一定同一天调（如 2019-09-18 只调了存款便利），按日期合并后向前填充
+    by_date = {}
+    for r in rows:
+        v = _num(r.get("OBS_VALUE"))
+        if v is not None:
+            by_date.setdefault(r["TIME_PERIOD"], {})[names[r["KEY"].split(".")[6]]] = v
+    out, cur = [], {}
+    for d in sorted(by_date):
+        cur.update(by_date[d])
+        if len(cur) == len(names):         # 三项齐了才输出
+            out.append(dict({"date": d}, **cur))
+    if start:     # 从 start 当天仍在生效的那次开始（start 当天正好调息，就从这次开始）
+        pre = [i for i, r in enumerate(out) if r["date"] <= first]
+        out = out[pre[-1]:] if pre else out
+    else:
+        out = out[-int(last):]
+    if not out:
+        raise DataNotAvailable("ECB 关键利率：所选区间之前和之内都没有记录")
+    return out
+
+
+def ecb_yield_curve(curve: str = "AAA", tenors=("3M", "1Y", "2Y", "5Y", "10Y", "30Y"),
+                    last: int = 1, start: str = None, end: str = None) -> list[dict]:
+    """
+    欧元区国债即期收益率曲线（%）。
+    curve="AAA" 只含 AAA 评级国家（ECB 主口径）；curve="all" 含全部欧元区国家（收益率更高）
+    tenors: 期限，如 "3M" "6M" "1Y" … "30Y"
+    返回 [{date, "3M": …, "10Y": …}]，日期升序
+    """
+    code = {"AAA": "G_N_A", "ALL": "G_N_C"}.get(curve.upper())
+    if not code:
+        raise ValueError('curve 只能是 "AAA" 或 "all"')
+    if isinstance(tenors, str):
+        tenors = [tenors]
+    tenors = [str(t).upper() for t in tenors]
+    if not all(re.fullmatch(r"\d{1,2}[MY]", t) for t in tenors):
+        raise ValueError(f"期限格式应为 3M / 10Y 这类，收到 {tenors!r}")
+    key = f"B.U2.EUR.4F.{code}.SV_C_YM." + "+".join(f"SR_{t}" for t in tenors)
+    rows = ecb_series("YC", key, last, start, end)
+    pivot = _pivot_by_date(rows, lambda k: k.split(".")[-1][3:])
+    return [dict({"date": p["date"]}, **{t: p[t] for t in tenors if t in p}) for p in pivot]
+
+
+# ── 13.3 纽约联储 — 美元货币市场参考利率 ──
+
+_NYFED_RATES = {"sofr": "secured", "tgcr": "secured", "bgcr": "secured", "sofrai": "secured",
+                "effr": "unsecured", "obfr": "unsecured"}
+
+
+def nyfed_rates(rate: str = "sofr", last: int = 5, start: str = None,
+                end: str = None) -> list[dict]:
+    """
+    纽约联储参考利率（S 级；对外展示或分发须附纽约联储规定的声明，见合规分级）。
+    rate: sofr 担保隔夜融资利率 / effr 有效联邦基金利率 / obfr 隔夜银行融资利率 /
+          tgcr、bgcr 三方 / 广义回购利率 / sofrai SOFR 30·90·180 天平均与指数
+    last 取最近 N 个工作日（1–999）；或给 start/end（YYYY-MM-DD）。返回原始字段，按日期升序：
+      effectiveDate, percentRate, percentPercentile1/25/75/99, volumeInBillions
+      （effr 另有 targetRateFrom/To 目标区间；sofrai 为 average30day/90day/180day, index）
+    """
+    kind = _NYFED_RATES.get(str(rate).lower())
+    if not kind:
+        raise ValueError(f"rate 只能是 {sorted(_NYFED_RATES)}，收到 {rate!r}")
+    base = f"https://markets.newyorkfed.org/api/rates/{kind}/{rate.lower()}"
+    start, end = _check_range(start, end, _YMD_ONLY)
+    if start or end:
+        params = {"startDate": start or "2000-01-01", "endDate": end or _date.today().isoformat()}
+        j = official_get(f"{base}/search.json", params=params, as_json=True)
+    else:
+        if not 1 <= int(last) <= 999:
+            raise ValueError("last 范围 1–999（纽约联储上限；更长请用 start/end）")
+        j = official_get(f"{base}/last/{int(last)}.json", as_json=True)
+    rows = j.get("refRates") or []
+    if not rows:
+        raise DataNotAvailable(f"纽约联储 {rate} 在该区间没有数据（SOFR 2018-04-02 起）")
+    return sorted(rows, key=lambda r: r["effectiveDate"])
+
+
+# ── 13.4 美联储 — H.10 汇率 / H.6 货币存量 ──
+
+# 美联储数据下载页的整包地址（官网没写成文档，下载页生成的固定链接）
+_FED_PACKAGES = {
+    "H10": "60f32914ab61dfab590e0e470153e3ae",   # 美元对 23 种货币，日频，每周一发布上一周
+    "H6": "798e2796917702a5f8423426ba7e6b42",    # M1 / M2 及其组成，月频
+}
+
+
+def fed_data(release: str = "H10", last: int = 10) -> dict:
+    """
+    美联储理事会公开数据（S 级，公有领域，须注明来源 Federal Reserve Board）。
+    release: "H10" 汇率 / "H6" 货币存量；last: 最近 N 个观测（1–5000）
+    返回 {"release", "series": {代码: {name, unit, multiplier, currency, quote?}},
+          "rows": [{date, 代码: 数值或 None}]}，日期升序
+
+    ⚠️ H10 的报价方向不统一：澳元、欧元、新西兰元、英镑是「1 单位外币 = 多少美元」
+       （代码含 $US，quote 字段已标出），其余是「1 美元 = 多少外币」。
+    ⚠️ H6 数值要乘 multiplier 才是美元（多数是 1e9，即十亿美元）。
+    """
+    rel = str(release).upper().replace(".", "")
+    if rel not in _FED_PACKAGES:
+        raise ValueError(f"release 只能是 {list(_FED_PACKAGES)}，收到 {release!r}")
+    if not 1 <= int(last) <= 5000:
+        raise ValueError("last 范围 1–5000（超过 5000 时美联储返回空文件）")
+    text = official_get("https://www.federalreserve.gov/datadownload/Output.aspx", params={
+        "rel": rel, "series": _FED_PACKAGES[rel], "lastobs": str(int(last)), "from": "", "to": "",
+        "filetype": "csv", "label": "include", "layout": "seriescolumn", "type": "package"})
+    lines = list(csv.reader(io.StringIO(text)))
+    head = {r[0].strip().rstrip(":"): r[1:] for r in lines if r and not r[0][:1].isdigit()}
+    if "Time Period" not in head:
+        raise RuntimeError("美联储下载接口没有返回 CSV（地址规则可能已变，请到官网数据下载页核对）")
+    codes = head["Time Period"]
+    series = {}
+    for i, c in enumerate(codes):
+        meta = {"name": head.get("Series Description", [""] * len(codes))[i],
+                "unit": head.get("Unit", [""] * len(codes))[i],
+                "multiplier": _num(head.get("Multiplier", [""] * len(codes))[i]),
+                "currency": head.get("Currency", [""] * len(codes))[i]}
+        if rel == "H10":
+            meta["quote"] = ("USD per 1 " + meta["currency"]) if "$US" in c \
+                else (meta["currency"] + " per 1 USD")
+        series[c] = meta
+    rows = [dict({"date": r[0]}, **{c: _num(v) for c, v in zip(codes, r[1:])})
+            for r in lines if r and r[0][:1].isdigit()]
+    if not rows:
+        raise DataNotAvailable(f"美联储 {rel} 没有返回数据行")
+    return {"release": rel, "series": series, "rows": rows}
+
+
+# ── 13.5 美国财政部 FiscalData — 国债拍卖 / 债务 / 平均利率 / 记账汇率 ──
+
+_FISCAL = {
+    # 名称: (路径, 默认排序, 默认字段；None = 全部字段)
+    "debt": ("/v2/accounting/od/debt_to_penny", "-record_date",
+             "record_date,tot_pub_debt_out_amt,debt_held_public_amt,intragov_hold_amt"),
+    "avg_rates": ("/v2/accounting/od/avg_interest_rates", "-record_date",
+                  "record_date,security_type_desc,security_desc,avg_interest_rate_amt"),
+    "auctions": ("/v1/accounting/od/auctions_query", "-auction_date",
+                 "auction_date,issue_date,maturity_date,cusip,security_type,security_term,"
+                 "reopening,offering_amt,high_yield,high_investment_rate,high_discnt_rate,int_rate,"
+                 "bid_to_cover_ratio,total_tendered,total_accepted"),
+    "upcoming": ("/v1/accounting/od/upcoming_auctions", "auction_date", None),
+    "fx": ("/v1/accounting/od/rates_of_exchange", "-record_date",
+           "record_date,country_currency_desc,exchange_rate,effective_date"),
+}
+
+
+def fiscal_data(dataset: str = "debt", filters: str = None, limit: int = 20,
+                fields: str = None) -> list[dict]:
+    """
+    美国财政部 FiscalData 开放接口（S 级，官方明示无需注册或 token）。
+    dataset:
+      "debt"      每日联邦债务总额（tot_pub_debt_out_amt，美元）及公众 / 政府内部持有
+      "avg_rates" 各类国债的月度平均利率（%）
+      "auctions"  国债拍卖：中标利率、投标倍数。中长期国债（Note/Bond）看 high_yield；
+                  短期国库券（Bill）看 high_investment_rate（等价收益率）和 high_discnt_rate
+                  （贴现率），它的 high_yield 恒为 None。已公告未拍卖的结果字段全为 None
+      "upcoming"  未来拍卖日程（自动只保留今天及以后）
+      "fx"        财政部季度记账汇率（政府会计用，1 美元 = 多少外币，不是市场价）
+    filters: 官方过滤语法，如 "security_type:eq:Note" 或
+             "country_currency_desc:in:(Japan-Yen,Euro Zone-Euro)"；多个条件用逗号连接
+    limit  : 返回条数（1–10000）；fields: 逗号分隔的字段名，覆盖默认字段
+    返回 [dict]；数值保持官方的字符串格式（自己 float()），官方写 "null" 的转成 None
+    """
+    if dataset not in _FISCAL:
+        raise ValueError(f"dataset 只能是 {list(_FISCAL)}，收到 {dataset!r}")
+    path, sort, default_fields = _FISCAL[dataset]
+    if not 1 <= int(limit) <= 10000:
+        raise ValueError("limit 范围 1–10000")
+    flt = [filters] if filters else []
+    if dataset == "upcoming":
+        flt.append(f"auction_date:gte:{_date.today().isoformat()}")
+    params = {"sort": sort, "page[size]": int(limit)}
+    if flt:
+        params["filter"] = ",".join(flt)
+    if fields or default_fields:
+        params["fields"] = fields or default_fields
+    j = official_get("https://api.fiscaldata.treasury.gov/services/api/fiscal_service" + path,
+                     params=params, as_json=True)
+    rows = j.get("data") or []
+    if not rows:
+        raise DataNotAvailable(f"FiscalData {dataset} 没有符合条件的数据")
+    return [{k: (None if v == "null" else v) for k, v in r.items()} for r in rows]
+```
+
+**实测（2026-10-11，Python 3.9）**：
+- BIS：38 家央行有今年的数，美国 3.875（目标区间中值）、欧元区 2.5、日本 1.25、中国 3.0；多数更新到 10-06，澳洲停在 09-24
+- ECB：1 欧元 = 1.1225 美元（10-02）、177.34 日元（10-09）；存款便利利率 2.5（09-16 起）；AAA 曲线 10-08：3M 2.53 / 2Y 3.03 / 10Y 3.52 / 30Y 3.78，全部国家口径 10Y 4.13
+- 纽约联储：SOFR 3.87（10-08，成交 2.96 万亿美元）、EFFR 3.88（目标 3.75–4.00）、SOFR 30 天平均 3.82
+- 美联储：H.10 23 种货币，10-02 一美元 = 157.81 日元；H.6 2026-08 M2（未季调）23,284.3 十亿美元
+- 财政部：10-08 联邦债务 40.31 万亿美元；09-30 国库券平均利率 3.870%；10-07 拍卖 9 年 10 个月期票据中标 5.300%、投标倍数 2.77；10-13 至 10-22 共 11 场待拍卖
+- 出错路径：代码不存在 → `DataNotAvailable`；参数格式不对 → `ValueError`；FiscalData 过滤字段写错 → `RuntimeError` 带官方报错原文
+
+---
+
 ## 数据源优先级
 
 | 场景 | 第一优先 | 备选 | 说明 |
@@ -2175,7 +2818,8 @@ def earnings_calendar(date: str = None) -> dict:
 | 美股行情 | 新浪 `gb_XXXX` | 腾讯 / 东财 push2 | 新浪有中文名+EPS+PE |
 | 港股行情 | 腾讯 `r_hkXXXXX` | 新浪 / 东财 push2 | 腾讯字段最全(78个) |
 | 美股K线 | 新浪 | Yahoo chart | 新浪回溯至1984年；Yahoo支持多周期 |
-| 港股K线 | Yahoo chart | — | 新浪港股K线已失效；push2his不返回港股K线 |
+| 港股K线 | Yahoo chart | — | 新浪港股K线已失效；push2his不返回港股K线。⚠️D 级 |
+| 日本/台湾/韩国/印度/欧洲等K线 | Yahoo chart | — | 换代码后缀，见「Yahoo Finance 代码格式」。⚠️D 级 |
 | 财报三表(中文) | 东财 datacenter | — | 中文科目名，按行展开 |
 | 财报三表(结构化) | Yahoo quoteSummary | — | 英文，完整报表结构 |
 | 关键指标(中文) | 东财 GMAININDICATOR | — | ROE/ROA/EPS/毛利率/资产负债率 (美49/港75字段) |
@@ -2189,7 +2833,12 @@ def earnings_calendar(date: str = None) -> dict:
 | **当日申报流(Form4/8-K/13F)** | **EDGAR 每日索引** ⭐ | — | 仅美股。**S 级可商用** |
 | **申报全文检索** | **EDGAR FTS** ⭐ | — | 2001 至今正文。**S 级可商用** |
 | **全市场基本面横截面** | **EDGAR frames** ⭐ | — | 免费 screener。**S 级可商用** |
-| **收益率曲线 / COT / 财报日历** | **Treasury / CFTC / Nasdaq** ⭐ | — | 宏观与事件驱动 |
+| **收益率曲线 / COT / 财报日历** | **Treasury / CFTC / Nasdaq** ⭐ | — | 宏观与事件驱动；财报日历 D 级 |
+| **全球央行政策利率** | **BIS** ⭐ | 各国央行官网 | 一次取 38 家；各国更新有滞后，看 date |
+| **欧元汇率 / ECB 利率 / 欧元区收益率曲线** | **ECB** ⭐ | — | 须注明 "Source: ECB statistics." 且不得改动 |
+| **美元参考利率 SOFR / EFFR** | **纽约联储** ⭐ | — | 对外展示须附纽约联储声明 |
+| **美元对各国货币汇率** | **美联储 H.10** ⭐ | ECB（欧元口径） | H.10 周一发布上一周，非实时 |
+| **国债拍卖 / 联邦债务 / 平均利率** | **财政部 FiscalData** ⭐ | — | **S 级可商用** |
 | SEC Filing | EDGAR | — | 官方数据，仅美股 |
 | XBRL财务 | EDGAR | — | 503个GAAP指标 |
 | 搜索 | 东财 search | Yahoo search | 东财有 secid 映射 |
@@ -2203,19 +2852,23 @@ def earnings_calendar(date: str = None) -> dict:
 | 数据源 | 合规级 | 协议 | 鉴权 | 覆盖 |
 |--------|------|------|------|------|
 | **SEC EDGAR** | **S** | HTTPS | 零(需真实UA) | 美股 Filing/XBRL/**每日申报流**/**全文检索**/**全市场横截面** |
-| **US Treasury** | **S** | HTTPS | 零 | **收益率曲线(1M~30Y)** |
+| **US Treasury** | **S** | HTTPS | 零 | **收益率曲线(1M~30Y)** / **FiscalData 国债拍卖·联邦债务·平均利率** |
 | **CFTC** | **S** | HTTPS | 零 | **COT 持仓报告** |
 | **FINRA** | **B** | HTTPS | 零 | 美股 **每日空头成交量(全市场)**（商用需自行确认） |
 | **CBOE** | **C** | HTTPS | 零 | 美股 **期权全链+希腊字母+IV+0DTE**（使用需 Cboe 事先授权） |
-| **Nasdaq** | **C** | HTTPS | 零 | 美股 **财报日历**（条款未核实） |
+| **美联储理事会** | **S** | HTTPS | 零 | **H.10 汇率 / H.6 货币存量**（注明来源） |
+| **纽约联储** | **S** | HTTPS | 零 | **SOFR / EFFR / OBFR / TGCR / BGCR**（展示须附声明） |
+| **BIS** | **S** | HTTPS | 零 | **全球央行政策利率**（注明来源） |
+| **欧洲央行 ECB** | **S** | HTTPS | 零 | **欧元汇率 / ECB 利率 / 欧元区收益率曲线**（注明来源、不得改动） |
 | 东财 push2 | C | HTTPS | 零 | 美股+港股 实时行情+全市场列表 |
 | 东财 push2his | C | HTTPS | 零 | 美股+港股 资金流（K线仅A股，不覆盖美股/港股） |
 | 东财 datacenter | C | HTTPS | 零 | 美股+港股 财报三表+GMAININDICATOR关键指标 |
 | 东财 search API | C | HTTPS | 零 | 全球股票搜索+secid映射 |
-| Yahoo Finance | C | HTTPS | cookie+crumb(自动) | 美股+港股 全品类 |
+| **Nasdaq** | **D** | HTTPS | 零 | 美股 **财报日历**（条款禁止自动抓取） |
+| Yahoo Finance | D | HTTPS | cookie+crumb(自动) | 美股+港股+其他市场 全品类（条款禁止自动抓取） |
 | 新浪财经 | C | HTTP | 零 | 美股+港股 行情、美股K线 |
 | 腾讯财经 | C | HTTPS | 零 | 美股+港股 行情 |
 
-**级别含义**：**S**＝美国政府数据，可商用可再分发｜**B**＝主动公开的数据文件，商用需自行确认｜**C**＝需事先授权或条款未核实，仅个人研究。各级依据的条款原文见顶部「数据源合规分级」。
+**级别含义**：**S**＝政府与央行数据，可商用可再分发（部分要求注明来源）｜**B**＝主动公开的数据文件，商用需自行确认｜**C**＝需事先授权或条款未核实，仅个人研究｜**D**＝条款禁止未经许可的自动抓取，仅供个人学习研究、风险自负、不得商用或再分发。各级依据的条款原文见顶部「数据源合规分级」。
 
 > 📦 https://github.com/simonlin1212/global-stock-data — Star ⭐ 是最好的支持
